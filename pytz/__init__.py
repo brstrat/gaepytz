@@ -30,11 +30,6 @@ import sys, datetime, os.path, gettext
 from UserDict import DictMixin
 from UserList import UserList
 
-try:
-    from pkg_resources import resource_stream
-except ImportError:
-    resource_stream = None
-
 from tzinfo import AmbiguousTimeError, InvalidTimeError, NonExistentTimeError
 from tzinfo import unpickler
 from tzfile import build_tzinfo
@@ -55,6 +50,12 @@ class TimezoneLoader(object):
         Uses the pkg_resources module if available and no standard file
         found at the calculated location.
         """
+        
+        #try:
+        #    from pkg_resources import resource_stream
+        #except ImportError:
+        resource_stream = None
+
         name_parts = name.lstrip('/').split('/')
         for part in name_parts:
             if part == os.path.pardir or os.path.sep in part:

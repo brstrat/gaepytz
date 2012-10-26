@@ -29,16 +29,22 @@ import pytz
 import zipfile
 from cStringIO import StringIO
 
-try:
-    from google.appengine.api import memcache
-except ImportError:
-    # This means that we're not running under the SDK, likely a script
-    class memcache(object):
-        def add(*args, **kwargs):
-            pass
+# Fake memcache for when we're not running under the SDK, likely a script.
+class memcache(object):
+    @classmethod
+    def add(*args, **kwargs):
+        pass
 
-        def get(*args, **kwargs):
-            return None
+    @classmethod
+    def get(*args, **kwargs):
+        return None
+
+try:
+    # Don't use memcache outside of Google App Engine or with GAE's dev server.
+    if not os.environ.get('SERVER_SOFTWARE', '').startswith('Development'):
+        from google.appengine.api import memcache
+except ImportError:
+    pass
 
 zoneinfo = None
 zoneinfo_path = os.path.abspath(os.path.join(os.path.dirname(__file__),
@@ -70,9 +76,9 @@ class TimezoneLoader(object):
         if zonedata is None:
             zonedata = get_zoneinfo().read('zoneinfo/' + '/'.join(name_parts))
             memcache.add(cache_key, zonedata)
-            logging.info('Added timezone to memcache: %s' % cache_key)
+            #logging.info('Added timezone to memcache: %s' % cache_key)
         else:
-            logging.info('Loaded timezone from memcache: %s' % cache_key)
+            pass#logging.info('Loaded timezone from memcache: %s' % cache_key)
 
         return StringIO(zonedata)
 
